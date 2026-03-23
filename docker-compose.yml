@@ -1,0 +1,58 @@
+# defining one service called postgres for now.
+
+# official postgres:15 image
+
+# port 5432
+
+# environment variables used - POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+
+services: 
+
+  postgres:
+    image: postgres:15
+    restart: always
+    # shared memory limit when using docker compose
+    shm_size: 128mb
+    ports: 
+      - "5432:5432"
+      
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    restart: always
+    ports: 
+      - "9092:9092"
+    
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    restart: always
+    ports:
+      - "2181:2181"
+
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+
+# what is happening here
+
+# we are running 3 main services and 1 dependent service for kafka (zookeeper)
+
+# ports meaning left : right = local_host:docker_container
+# they can be two diff port numbers
+
+# image is always repository/image-name:version
