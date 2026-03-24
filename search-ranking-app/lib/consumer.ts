@@ -8,6 +8,7 @@
 
 import { kafka } from './kafka'
 import { Client } from 'pg'
+import redis from './redis';
 
 // connect to db
 
@@ -30,6 +31,15 @@ async function runQuery(resultId: string, query: string) {
       last_clicked = NOW(),
       score = (results_ranking.click_count + 1) * (1.0 / (EXTRACT(EPOCH FROM NOW() - results_ranking.last_clicked) / 86400 + 1))`, [resultId, query])
     console.log(res.rows[0]);
+
+    // getting the result and score to write into redis
+    const rankings = await client.query(
+      `SELECT result_id, score FROM results_ranking 
+      WHERE query = $1 ORDER BY score DESC`, [query]
+    )
+    // write into redis with set function and then stringify
+    await redis.set(query, JSON.stringify(rankings.rows))
+
   } catch (err) {
     console.error('query error');
   } finally {
