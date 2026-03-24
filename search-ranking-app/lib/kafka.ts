@@ -2,7 +2,7 @@
 
 import { Kafka } from 'kafkajs'
 
-const kafka = new Kafka({
+export const kafka = new Kafka({
   clientId: 'search-ranking',
   brokers: ['localhost:9092'],
 })
