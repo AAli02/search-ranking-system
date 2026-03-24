@@ -6,7 +6,7 @@
 // JSON.parse() each message
 // UPDATE results_ranking DB - += click_count and UPDATE score
 
-import { kafka } from '@/lib/kafka'
+import { kafka } from './kafka'
 import { Client } from 'pg'
 
 // connect to db
@@ -63,3 +63,5 @@ async function startConsumer() {
     }
   })
 }
+
+startConsumer().catch(console.error)
