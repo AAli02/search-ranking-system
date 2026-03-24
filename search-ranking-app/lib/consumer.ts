@@ -20,15 +20,15 @@ const client = new Client({
 });
 
 async function runQuery(resultId: string, query: string) {
-  await client.connect();
   try {
     const res = await client.query(
-      `INSERT INTO results_ranking (result_id, query, click_count, score)
-    VALUES ($1, $2, 1, 1)
+      `INSERT INTO results_ranking (result_id, query, click_count, score, last_clicked)
+    VALUES ($1, $2, 1, 1, NOW())
     ON CONFLICT (result_id, query) 
     DO UPDATE SET 
-    click_count = results_ranking.click_count + 1,
-    score = results_ranking.score + 1`, [resultId, query])
+      click_count = results_ranking.click_count + 1,
+      last_clicked = NOW(),
+      score = (results_ranking.click_count + 1) * (1.0 / (EXTRACT(EPOCH FROM NOW() - results_ranking.last_clicked) / 86400 + 1))`, [resultId, query])
     console.log(res.rows[0]);
   } catch (err) {
     console.error('query error');
@@ -41,12 +41,13 @@ async function runQuery(resultId: string, query: string) {
 const consumer = kafka.consumer({ groupId: 'my-group ' })
 
 async function startConsumer() {
+  // setting client connect here so we dont open a new db connection for every mesage
+  await client.connect();
   // connect consumer
   await consumer.connect()
 
   // sub to consumer topic(s)
   await consumer.subscribe({ topic: 'click-events', fromBeginning: true })
-
 
   // consumer.run() with eachMesage
   await consumer.run({
