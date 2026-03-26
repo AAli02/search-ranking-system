@@ -40,13 +40,14 @@ async function runQuery(resultId: string, query: string) {
     // write into redis with set function and then stringify
     await redis.set(query, JSON.stringify(rankings.rows))
 
-  } catch {
-    console.error('query error');
+  } catch (error) {
+    console.error('query error:', error)
+    throw error
   }
 }
 
 // creating consumer with group id
-const consumer = kafka.consumer({ groupId: 'my-group ' })
+const consumer = kafka.consumer({ groupId: 'my-group' })
 
 async function startConsumer() {
   // setting client connect here so we dont open a new db connection for every mesage
@@ -68,7 +69,7 @@ async function startConsumer() {
       })
       const { resultId, query } = JSON.parse(message.value?.toString() || '{}')
 
-      runQuery(resultId, query);
+      await runQuery(resultId, query);
     }
   })
 }

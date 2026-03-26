@@ -19,7 +19,7 @@ export async function GET() {
         FROM results_ranking
         ORDER BY score DESC`
     )
-    return Response.json({ results: pgQuery.rows })
+    return Response.json(pgQuery.rows)
   } catch (error) {
     console.log(error)
     return new Response('Failed!', { status: 400 })
