@@ -40,7 +40,7 @@ async function runQuery(resultId: string, query: string) {
     // write into redis with set function and then stringify
     await redis.set(query, JSON.stringify(rankings.rows))
 
-  } catch (err) {
+  } catch {
     console.error('query error');
   } finally {
     await client.end()

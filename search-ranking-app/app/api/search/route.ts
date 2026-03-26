@@ -22,7 +22,7 @@ const client = new Client({
   port: 5432
 });
 
-await client.connect()
+client.connect()
 
 export async function GET(request: NextRequest) {
 
@@ -31,11 +31,10 @@ export async function GET(request: NextRequest) {
 
 
   try {
-
     if (!q) {
       return new Response('missing query', { status: 400 })
     }
-    
+
     const redisCache = await redis.get(q)
 
     if (redisCache) {
@@ -46,7 +45,6 @@ export async function GET(request: NextRequest) {
         WHERE query = $1 
         ORDER BY score DESC`, [q]
       )
-
       return Response.json(pgQuery.rows)
     }
   } catch {
