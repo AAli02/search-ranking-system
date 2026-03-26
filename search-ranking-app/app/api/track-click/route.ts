@@ -10,30 +10,23 @@
 import { NextRequest } from "next/server"
 import { producer } from '@/lib/kafka'
 
+producer.connect()
+
 export async function POST(request: NextRequest) {
-
   try {
-    // get data first
     const { userId, resultId, query } = await request.json()
-    // assign data to clickData
     const clickData = { userId, resultId, query, timestamp: Date.now() }
-
-    await producer.connect();
 
     await producer.send({
       topic: 'click-events',
-      messages: [{ value: JSON.stringify(clickData)}]
+      messages: [{ value: JSON.stringify(clickData) }]
     })
 
     console.log(userId, resultId, query)
 
-    await producer.disconnect()
-
-  } catch (error) {
+  } catch {
     return new Response('Failed!', { status: 400 })
   }
 
-  return new Response('Success!', {
-    status: 200,
-  })
+  return new Response('Success!', { status: 200 })
 }

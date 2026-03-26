@@ -15,12 +15,12 @@ import { Client } from "pg";
 // if not found query postgres and return results
 
 const client = new Client({
-  user: 'user_here',
-  database: 'db_name',
-  password: 'example12',
-  host: 'localhost',
-  port: 5432
-});
+  user: process.env.DB_USER,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT)
+})
 
 client.connect()
 
@@ -38,16 +38,17 @@ export async function GET(request: NextRequest) {
     const redisCache = await redis.get(q)
 
     if (redisCache) {
-      return Response.json(JSON.parse(redisCache))
+      return Response.json({ results: JSON.parse(redisCache), source: 'redis' })
     } else {
       const pgQuery = await client.query(
         `SELECT result_id, score FROM results_ranking 
         WHERE query = $1 
         ORDER BY score DESC`, [q]
       )
-      return Response.json(pgQuery.rows)
+      return Response.json({ results: pgQuery.rows, source: 'postgres' })
     }
-  } catch {
-
+  } catch (error) {
+    console.log('Producer error:', error)
+    return new Response('Failed!', { status: 400 })
   }
 } 

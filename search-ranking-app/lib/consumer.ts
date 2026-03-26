@@ -13,12 +13,12 @@ import redis from './redis';
 // connect to db
 
 const client = new Client({
-  user: 'user_here',
-  database: 'db_name',
-  password: 'example12',
-  host: 'localhost',
-  port: 5432
-});
+  user: process.env.DB_USER,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT)
+})
 
 async function runQuery(resultId: string, query: string) {
   try {
@@ -42,8 +42,6 @@ async function runQuery(resultId: string, query: string) {
 
   } catch {
     console.error('query error');
-  } finally {
-    await client.end()
   }
 }
 
